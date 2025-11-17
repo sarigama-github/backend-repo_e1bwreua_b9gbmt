@@ -1,48 +1,60 @@
 """
-Database Schemas
+Database Schemas for Charity Sponsorship App
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model below maps to a MongoDB collection. The collection name is the
+lowercased class name by convention.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
-
-class User(BaseModel):
+class Sponsor(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Sponsors collection schema
+    Collection: "sponsor"
     """
     name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    email: str = Field(..., description="Unique email address")
+    password_hash: str = Field(..., description="Hashed password")
+    country: Optional[str] = Field(None, description="Country of residence")
+    bio: Optional[str] = Field(None, description="Short bio")
+    avatar_url: Optional[str] = Field(None, description="Profile image URL")
+    api_key: Optional[str] = Field(None, description="Simple API key for session auth")
+    is_active: bool = Field(True, description="Whether sponsor is active")
 
-class Product(BaseModel):
+class Child(BaseModel):
     """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
+    Children collection schema
+    Collection: "child"
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+    name: str = Field(..., description="Child name")
+    age: int = Field(..., ge=0, le=18, description="Age in years")
+    country: str = Field(..., description="Country")
+    bio: Optional[str] = Field(None, description="Short story/bio")
+    photo_url: Optional[str] = Field(None, description="Photo URL")
+    sponsored: bool = Field(False, description="Whether child is sponsored")
+    sponsored_by: Optional[str] = Field(None, description="Sponsor id as string")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class Donation(BaseModel):
+    """
+    Donations collection schema
+    Collection: "donation"
+    """
+    sponsor_id: str = Field(..., description="Sponsor id as string")
+    child_id: str = Field(..., description="Child id as string")
+    amount: float = Field(..., ge=0, description="Donation amount")
+    currency: str = Field("USD", description="Currency code")
+    month: Optional[str] = Field(None, description="YYYY-MM month this donation applies to")
+    status: str = Field("completed", description="Donation status")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Update(BaseModel):
+    """
+    Child updates collection schema
+    Collection: "update"
+    """
+    child_id: str = Field(..., description="Child id as string")
+    title: str = Field(..., description="Short title")
+    content: Optional[str] = Field(None, description="Update content")
+    photo_url: Optional[str] = Field(None, description="Optional photo URL")
+
+# Example additional schemas could be added here if needed.
